@@ -12,6 +12,9 @@ pr:
     include:
       - master
 
+variables:
+- group: var-group # Підключення Variable Group
+
 stages:
   - stage: Build
     displayName: "Build Docker Image"
@@ -25,6 +28,10 @@ stages:
           - checkout: self
             displayName: "Checkout the repository"
 
+          # Print variables for debugging
+          - script: printenv
+            displayName: "Print all environment variables"
+
           # Login to Docker Hub
           - script: |
               echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
@@ -32,12 +39,12 @@ stages:
 
           # Build Docker image
           - script: |
-              docker build -t $(imageName):$(tag) .
+              docker build -t ${imageName}:${tag} .
             displayName: "Build Docker Image"
 
           # Push Docker image to Docker Hub
           - script: |
-              docker push $(imageName):$(tag)
+              docker push ${imageName}:${tag}
             displayName: "Push Docker Image"
 
   - stage: Deploy
@@ -61,6 +68,7 @@ stages:
                   --resource-group $(azurerm_resource_group_name) \
                   --docker-custom-image-name $(imageName):$(tag) \
                   --docker-registry-server-url https://index.docker.io/v1/
+
 
 
 
