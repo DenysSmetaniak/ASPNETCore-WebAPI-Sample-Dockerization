@@ -5,16 +5,12 @@
 trigger:
   branches:
     include:
-      - main
+      - master
 
 pr:
   branches:
     include:
-      - main
-
-variables:
-  imageName: "dsmetaniak/bstg-webapp-image" # Ваш Docker Hub репозиторій
-  tag: "latest"
+      - master
 
 stages:
   - stage: Build
@@ -26,7 +22,8 @@ stages:
           vmImage: "ubuntu-latest"
         steps:
           # Checkout the repository
-          - task: Checkout@1
+          - checkout: self
+            displayName: "Checkout the repository"
 
           # Login to Docker Hub
           - script: |
@@ -52,26 +49,19 @@ stages:
         pool:
           vmImage: "ubuntu-latest"
         steps:
-          # Install Azure CLI
-          - task: UsePythonVersion@0
+          # Login to Azure and deploy Docker Image
+          - task: AzureCLI@2
             inputs:
-              versionSpec: "3.x"
-          - script: |
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: "Install Azure CLI"
+              azureSubscription: "aspnet-azure-connection" # Змініть на правильну назву
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az webapp config container set \
+                  --name $(app_service_name) \
+                  --resource-group $(azurerm_resource_group_name) \
+                  --docker-custom-image-name $(imageName):$(tag) \
+                  --docker-registry-server-url https://index.docker.io/v1/
 
-          # Login to Azure CLI
-          - script: |
-              az login --service-principal -u $(azure_connection.servicePrincipalId) -p $(azure_connection.servicePrincipalKey) --tenant $(azure_connection.tenantId)
-            displayName: "Login to Azure CLI"
 
-          # Deploy Docker Image to Azure App Service
-          - script: |
-              az webapp config container set \
-                --name $(app_service_name) \
-                --resource-group $(azurerm_resource_group_name) \
-                --docker-custom-image-name $(imageName):$(tag) \
-                --docker-registry-server-url https://index.docker.io/v1/
-            displayName: "Deploy Docker Image to Azure App Service"
 
 
