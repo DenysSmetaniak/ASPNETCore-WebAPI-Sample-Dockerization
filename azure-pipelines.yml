@@ -26,7 +26,7 @@ stages:
           vmImage: "ubuntu-latest"
         steps:
           # Checkout the repository
-          - task: Checkout@v2
+          - task: Checkout@1
 
           # Login to Docker Hub
           - script: |
@@ -73,4 +73,5 @@ stages:
                 --docker-custom-image-name $(imageName):$(tag) \
                 --docker-registry-server-url https://index.docker.io/v1/
             displayName: "Deploy Docker Image to Azure App Service"
+
 
