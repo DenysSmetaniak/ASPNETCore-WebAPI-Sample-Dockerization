@@ -39,12 +39,12 @@ stages:
 
           # Build Docker image
           - script: |
-              docker build -t ${imageName}:${tag} .
+              docker build -t dsmetaniak/bstg-webapp-image:latest .
             displayName: "Build Docker Image"
 
           # Push Docker image to Docker Hub
           - script: |
-              docker push ${imageName}:${tag}
+              docker push dsmetaniak/bstg-webapp-image:latest
             displayName: "Push Docker Image"
 
   - stage: Deploy
@@ -66,7 +66,7 @@ stages:
                 az webapp config container set \
                   --name $(app_service_name) \
                   --resource-group $(azurerm_resource_group_name) \
-                  --docker-custom-image-name $(imageName):$(tag) \
+                  --docker-custom-image-name dsmetaniak/bstg-webapp-image:latest \
                   --docker-registry-server-url https://index.docker.io/v1/
 
 
