@@ -59,13 +59,13 @@ stages:
           # Login to Azure and deploy Docker Image
           - task: AzureCLI@2
             inputs:
-              azureSubscription: "aspnet-azure-connection" # Змініть на правильну назву
+              azureSubscription: "aspnet-azure-connection"
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp config container set \
-                  --name $(app_service_name) \
-                  --resource-group $(azurerm_resource_group_name) \
+                  --name aspnet-service-name \
+                  --resource-group aspnet-sample-rg \
                   --docker-custom-image-name dsmetaniak/bstg-webapp-image:latest \
                   --docker-registry-server-url https://index.docker.io/v1/
 
