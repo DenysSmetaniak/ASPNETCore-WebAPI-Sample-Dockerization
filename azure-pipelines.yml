@@ -28,9 +28,9 @@ stages:
           - checkout: self
             displayName: "Checkout the repository"
 
-          # Print variables for debugging
-          - script: printenv
-            displayName: "Print all environment variables"
+          # # Print variables for debugging
+          # - script: printenv
+          #   displayName: "Print all environment variables"
 
           # Login to Docker Hub
           - script: |
