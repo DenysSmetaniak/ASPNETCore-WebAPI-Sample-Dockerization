@@ -1,0 +1,76 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  imageName: "dsmetaniak/bstg-webapp-image" # Ваш Docker Hub репозиторій
+  tag: "latest"
+
+stages:
+  - stage: Build
+    displayName: "Build Docker Image"
+    jobs:
+      - job: Build
+        displayName: "Build Docker Image"
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          # Checkout the repository
+          - task: Checkout@v2
+
+          # Login to Docker Hub
+          - script: |
+              echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
+            displayName: "Login to Docker Hub"
+
+          # Build Docker image
+          - script: |
+              docker build -t $(imageName):$(tag) .
+            displayName: "Build Docker Image"
+
+          # Push Docker image to Docker Hub
+          - script: |
+              docker push $(imageName):$(tag)
+            displayName: "Push Docker Image"
+
+  - stage: Deploy
+    displayName: "Deploy to Azure"
+    dependsOn: Build
+    jobs:
+      - job: Deploy
+        displayName: "Deploy to Azure App Service"
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          # Install Azure CLI
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.x"
+          - script: |
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: "Install Azure CLI"
+
+          # Login to Azure CLI
+          - script: |
+              az login --service-principal -u $(azure_connection.servicePrincipalId) -p $(azure_connection.servicePrincipalKey) --tenant $(azure_connection.tenantId)
+            displayName: "Login to Azure CLI"
+
+          # Deploy Docker Image to Azure App Service
+          - script: |
+              az webapp config container set \
+                --name $(app_service_name) \
+                --resource-group $(azurerm_resource_group_name) \
+                --docker-custom-image-name $(imageName):$(tag) \
+                --docker-registry-server-url https://index.docker.io/v1/
+            displayName: "Deploy Docker Image to Azure App Service"
+
