@@ -13,7 +13,7 @@ pr:
       - master
 
 variables:
-- group: var-group # Підключення Variable Group
+- group: var-group
 
 stages:
   - stage: Build
