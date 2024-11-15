@@ -1,77 +1,54 @@
-# ASP.NET Core WebApi Sample with HATEOAS, Versioning & Swagger
+# Dockerized ASP.NET Core WebApi Sample with HATEOAS, Versioning & Swagger
 
-In this repository I want to give a plain starting point at how to build a WebAPI with ASP.NET Core.
+1) You need to create your own repo in Github and clone https://github.com/FabianGosebrink/ASPNETCore-WebAPI-Sample"
+2) Create a Dockerfile that will build application and run it. 
+3) Create a dockercompose.yml file that will inlude build (use local build context) and run stages, for local testing purposes, commit this file to repo. 
+4) Write your own Azure DevOps build flow using yaml syntax and commit it into your GitHub repo. Build and deploy from the main branch. Build on PR.
+5) Although you have multiple options to deploy the dockerized application, your manager heard about Azure App Service and knows that you have Terraform code for that. You should determine whether it's necessary to use the old Terraform code, Terraform code with modified configuration, or choose another platform and write Terraform code for it. Although you should write Terraform configuration, there's no requirement to implement CI/CD for it (but you can use your previous pipelines to address this and bring additional value)
 
-This repository contains a controller which is dealing with FoodItems. You can GET/POST/PUT/PATCH and DELETE them.
+See details report here: 
 
-Hope this helps.
+## Dockerfile
 
-See the examples here: 
+![ASPNETCOREWebAPIVersions](./screenshot/bildwithDockerfile.png)
 
-## Versions
+## Run locally
 
-``` http://localhost:29435/swagger ```
+![ASPNETCOREWebAPIGET](./screenshot/runlocally.png)
 
-![ASPNETCOREWebAPIVersions](./.github/versions.jpg)
+![ASPNETCOREWebAPIGET](./screenshot/vievlocally.png)
 
-## GET all Foods
+## Docker-compose
 
-``` http://localhost:29435/api/v1/foods ```
+![ASPNETCOREWebAPIGET](./screenshot/viewcompose.png)
 
-![ASPNETCOREWebAPIGET](./.github/get.jpg)
+![ASPNETCOREWebAPIGET](./screenshot/report.png)
 
-## GET single food
+## Published images into DockerHub for using with Terraform
 
-``` http://localhost:29435/api/v1/foods/2 ```
+```terraform
+  resource "azurerm_app_service" "app" {
+  name                = var.app_service_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
 
-![ASPNETCOREWebAPIGET](./.github/getSingle.jpg)
-
-## POST a foodItem
-
-``` http://localhost:29435/api/v1/foods ```
-
-```javascript
-  {
-      "name": "Lasagne",
-      "type": "Main",
-      "calories": 3000,
-      "created": "2017-09-16T17:50:08.1510899+02:00"
+  site_config {
+    linux_fx_version = "DOCKER|dsmetaniak/bstg-webapp-image:latest"
   }
-```
 
-![ASPNETCOREWebAPIGET](./.github/post.jpg)
-
-## PUT a foodItem
-
-``` http://localhost:29435/api/v1/foods/5 ```
-
-``` javascript
-{
-    "name": "Lasagne2",
-    "type": "Main",
-    "calories": 3000,
-    "created": "2017-09-16T17:50:08.1510899+02:00"
+  app_settings = {
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+  }
 }
 ```
 
-![ASPNETCOREWebAPIGET](./.github/put.jpg)
+![ASPNETCOREWebAPIGET](./screenshot/published-container.png)
 
+## Report pipeline
 
-## PATCH a foodItem
+![ASPNETCOREWebAPIGET](./screenshot/pipeline.png)
 
-``` http://localhost:29435/api/v1/foods/5 ```
+## Run WebApp
 
-``` javascript
-[
-  { "op": "replace", "path": "/name", "value": "mynewname" }
-]
-```
-
-![ASPNETCOREWebAPIGET](./.github/patch.jpg)
-
-## DELETE a foodItem
-
-``` http://localhost:29435/api/v1/foods/5 ```
-
-
-![ASPNETCOREWebAPIGET](./.github/delete.jpg)
+![ASPNETCOREWebAPIGET](./screenshot/webapp.png)
